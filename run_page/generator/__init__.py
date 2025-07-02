@@ -66,13 +66,19 @@ class Generator:
 
         # 在运行时读取环境变量，确保能获取到GitHub Actions设置的值
         min_sync_distance = float(os.getenv("MIN_SYNC_DISTANCE", "0.0"))
-        
+
         for activity in self.client.get_activities(**filters):
             if self.only_run and activity.type != "Run":
                 continue
             # 过滤小于最小距离的活动（仅在设置了MIN_SYNC_DISTANCE时）
-            if min_sync_distance > 0 and activity.distance is not None and activity.distance < min_sync_distance * 1000:
-                print(f"跳过小于{min_sync_distance}km的活动: {activity.name} ({activity.distance/1000:.2f}km)")
+            if (
+                min_sync_distance > 0
+                and activity.distance is not None
+                and activity.distance < min_sync_distance * 1000
+            ):
+                print(
+                    f"跳过小于{min_sync_distance}km的活动: {activity.name} ({activity.distance/1000:.2f}km)"
+                )
                 continue
             if IGNORE_BEFORE_SAVING:
                 if activity.map and activity.map.summary_polyline:
