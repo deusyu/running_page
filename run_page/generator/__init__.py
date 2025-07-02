@@ -74,10 +74,10 @@ class Generator:
             if (
                 min_sync_distance > 0
                 and activity.distance is not None
-                and activity.distance < min_sync_distance * 1000
+                and float(activity.distance) < min_sync_distance * 1000
             ):
                 print(
-                    f"跳过小于{min_sync_distance}km的活动: {activity.name} ({activity.distance/1000:.2f}km)"
+                    f"跳过小于{min_sync_distance}km的活动: {activity.name} ({float(activity.distance)/1000:.2f}km)"
                 )
                 continue
             if IGNORE_BEFORE_SAVING:
