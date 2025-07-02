@@ -15,6 +15,7 @@ from synced_data_file_logger import save_synced_data_file_list
 
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
+MIN_SYNC_DISTANCE = float(os.getenv("MIN_SYNC_DISTANCE", "0.0"))  # 最小同步距离（公里）
 
 
 class Generator:
@@ -66,6 +67,10 @@ class Generator:
 
         for activity in self.client.get_activities(**filters):
             if self.only_run and activity.type != "Run":
+                continue
+            # 过滤小于最小距离的活动
+            if MIN_SYNC_DISTANCE > 0 and activity.distance and activity.distance < MIN_SYNC_DISTANCE * 1000:
+                print(f"跳过小于{MIN_SYNC_DISTANCE}km的活动: {activity.name} ({activity.distance/1000:.2f}km)")
                 continue
             if IGNORE_BEFORE_SAVING:
                 if activity.map and activity.map.summary_polyline:
@@ -130,9 +135,11 @@ class Generator:
 
     def load(self):
         # if sub_type is not in the db, just add an empty string to it
+        # 使用配置的最小距离，默认0.1km
+        min_distance_filter = max(MIN_SYNC_DISTANCE, 0.1)
         activities = (
             self.session.query(Activity)
-            .filter(Activity.distance > 0.1)
+            .filter(Activity.distance > min_distance_filter * 1000)
             .order_by(Activity.start_date_local)
         )
         activity_list = []
